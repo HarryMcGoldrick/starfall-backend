@@ -2,3 +2,6 @@ database:
   port: "mongodb://127.0.0.1:27017"
   name: "fsDB"
   meteorite_landings_collection: meteorite_landings
+
+auth:
+  secret: "0d504094-eab3-4e24-8106-820f8d2c90d0"
