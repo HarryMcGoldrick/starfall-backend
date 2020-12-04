@@ -28,6 +28,13 @@ def get_all_meteorites():
 
 	return make_response(jsonify(data_to_return), 200)
 
+@meteorite_controller.route("/meteorites/<id>", methods=["GET"])
+def get_meteorite(id):
+	meteorite_id = request.view_args['id']
+	meteorite = meteorites.find_one({"_id": ObjectId(meteorite_id)})
+	meteorite["_id"] = str(meteorite["_id"])
+	return make_response(jsonify(meteorite), 200)
+
 @meteorite_controller.route("/meteorites/favourites", methods=["GET"])
 @jwt_required
 def get_all_favourites_for_user():
