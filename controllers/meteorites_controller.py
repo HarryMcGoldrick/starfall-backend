@@ -4,13 +4,12 @@ from bson import ObjectId
 from services.users_service import get_user_id_from_username
 from services.auth_service import jwt_required
 from models.database import Database
+from services.meteorites_service import getAllMeteoritesPaginated, getMeteoritesWithFilterOptionsPaginated
 
 meteorite_controller = Blueprint("meteorites", __name__)
 db = Database()
 meteorites = db.meteorites
 users = db.users
-
-# TODO seperate logic in meteorite service
 
 @meteorite_controller.route("/meteorites", methods=["GET"])
 def get_all_meteorites():
@@ -21,12 +20,23 @@ def get_all_meteorites():
 		page_size = int(request.args.get("ps"))
 	page_start = (page_size * (page_num - 1))
 	
-	data_to_return = []
-	for meteorite in meteorites.find().skip(page_start).limit(page_size):
-		meteorite["_id"] = str(meteorite["_id"])
-		data_to_return.append(meteorite)
+	meteorites = getAllMeteoritesPaginated(page_size, page_start)
+	return make_response(jsonify(meteorites), 200)
 
-	return make_response(jsonify(data_to_return), 200)
+@meteorite_controller.route("/meteorites/filter", methods=["GET"])
+def get_all_meteorites_filtered():
+	page_num, page_size = 1, 100
+	if request.args.get("pn"):
+		page_num = int(request.args.get("pn"))
+	if request.args.get("ps"):
+		page_size = int(request.args.get("ps"))
+	if request.args.get("name"):
+		name = request.args.get("name")
+	page_start = (page_size * (page_num - 1))
+	
+	print(request.args)
+	meteorites = getMeteoritesWithFilterOptionsPaginated(request.args, page_size, page_start)
+	return make_response(jsonify(meteorites), 200)
 
 @meteorite_controller.route("/meteorites/<id>", methods=["GET"])
 def get_meteorite(id):
