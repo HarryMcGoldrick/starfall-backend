@@ -4,38 +4,31 @@ from bson import ObjectId
 from services.users_service import get_user_id_from_username
 from services.auth_service import jwt_required
 from models.database import Database
-from services.meteorites_service import getAllMeteoritesPaginated, getMeteoritesWithFilterOptionsPaginated
+from services.meteorites_service import getAllMeteoritesSampled, getMeteoritesWithFilterOptionsSampled, getAllMeteorites
 
 meteorite_controller = Blueprint("meteorites", __name__)
 db = Database()
 meteorites = db.meteorites
 users = db.users
 
+@meteorite_controller.route("/meteorites/classifications", methods=["GET"])
+def get_all_meteorite_classifications():
+	classification = []
+	meteorites = getAllMeteorites()
+	for meteorite in meteorites:
+		if meteorite["recclass"]:
+			if meteorite["recclass"] not in classification:
+				classification.append(meteorite["recclass"])
+	return make_response(jsonify(classification), 200)
+
 @meteorite_controller.route("/meteorites", methods=["GET"])
-def get_all_meteorites():
-	page_num, page_size = 1, 100
-	if request.args.get("pn"):
-		page_num = int(request.args.get("pn"))
-	if request.args.get("ps"):
-		page_size = int(request.args.get("ps"))
-	page_start = (page_size * (page_num - 1))
-	
-	meteorites = getAllMeteoritesPaginated(page_size, page_start)
+def get_all_meteorites():	
+	meteorites = getAllMeteoritesSampled(request.args)
 	return make_response(jsonify(meteorites), 200)
 
 @meteorite_controller.route("/meteorites/filter", methods=["GET"])
 def get_all_meteorites_filtered():
-	page_num, page_size = 1, 100
-	if request.args.get("pn"):
-		page_num = int(request.args.get("pn"))
-	if request.args.get("ps"):
-		page_size = int(request.args.get("ps"))
-	if request.args.get("name"):
-		name = request.args.get("name")
-	page_start = (page_size * (page_num - 1))
-	
-	print(request.args)
-	meteorites = getMeteoritesWithFilterOptionsPaginated(request.args, page_size, page_start)
+	meteorites = getMeteoritesWithFilterOptionsSampled(request.args)
 	return make_response(jsonify(meteorites), 200)
 
 @meteorite_controller.route("/meteorites/<id>", methods=["GET"])
