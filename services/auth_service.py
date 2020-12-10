@@ -8,6 +8,7 @@ config = yaml.safe_load(open("config.yml"))
 db = Database()
 blacklist = db.blacklist
 
+# prevents use of a function if no jwt is present
 def jwt_required(func):
 	@wraps(func)
 	def jwt_required_wrapper(*args, **kargs):
@@ -24,6 +25,7 @@ def jwt_required(func):
 		return func(*args, **kargs)
 	return jwt_required_wrapper
 
+# Returns the jwt token if present in the Authorization header
 def get_auth_token():
 	auth_header = request.headers.get("Authorization")
 	if auth_header:
